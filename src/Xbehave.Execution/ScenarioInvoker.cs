@@ -153,7 +153,7 @@ namespace Xbehave.Execution
             var scenarioStepDefinitions = new List<IStepDefinition>();
             await this.aggregator.RunAsync(async () =>
             {
-                try
+                using (CurrentThread.AllowStepDefinition())
                 {
                     foreach (var backgroundMethod in this.scenario.TestCase.TestMethod.TestClass.Class
                         .GetMethods(false)
@@ -166,21 +166,13 @@ namespace Xbehave.Execution
 
                     backgroundStepDefinitions.AddRange(CurrentThread.StepDefinitions);
                 }
-                finally
-                {
-                    CurrentThread.StepDefinitions.Clear();
-                }
 
-                try
+                using (CurrentThread.AllowStepDefinition())
                 {
                     await this.timer.AggregateAsync(() =>
                         this.scenarioMethod.InvokeAsync(scenarioClassInstance, this.scenarioMethodArguments));
 
                     scenarioStepDefinitions.AddRange(CurrentThread.StepDefinitions);
-                }
-                finally
-                {
-                    CurrentThread.StepDefinitions.Clear();
                 }
             });
 
